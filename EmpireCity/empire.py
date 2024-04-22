@@ -69,6 +69,16 @@ point_V_x = (screeenWidth // 2) - (viseur.get_width() // 2)
 point_V_y = (screenHeight // 2) - (viseur.get_height() // 2)
 
 viseur_speed = 5
+
+# Définir la taille de la zone morte (zone orange)
+dead_zone_width = screeenWidth // 3
+dead_zone_height = screenHeight // 3
+
+# Définir les limites de la zone morte
+dead_zone_left = (screeenWidth - dead_zone_width) // 2.4
+dead_zone_right = dead_zone_left + dead_zone_width
+dead_zone_top = (screenHeight - dead_zone_height) // 2.6
+dead_zone_bottom = dead_zone_top + dead_zone_height
  
  
 # -------- Main Program Loop -----------
@@ -83,14 +93,27 @@ while not done:
          done = True
       elif event.type == pygame.KEYDOWN:
            # Gestion des touches du clavier pour déplacer le viseur
-           if event.key == pygame.K_UP:
-               point_V_y -= viseur_speed
-           elif event.key == pygame.K_DOWN:
-               point_V_y += viseur_speed
-           elif event.key == pygame.K_LEFT:
-               point_V_x -= viseur_speed
-           elif event.key == pygame.K_RIGHT:
-               point_V_x += viseur_speed
+           if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_UP:
+                    if point_V_y - viseur_speed < dead_zone_top:
+                        point_S_y -= viseur_speed
+                    else:
+                        point_V_y -= viseur_speed
+                elif event.key == pygame.K_DOWN:
+                    if point_V_y + viseur_speed > dead_zone_bottom:
+                        point_S_y += viseur_speed
+                    else:
+                        point_V_y += viseur_speed
+                elif event.key == pygame.K_LEFT:
+                    if point_V_x - viseur_speed < dead_zone_left:
+                        point_S_x -= viseur_speed
+                    else:
+                        point_V_x -= viseur_speed
+                elif event.key == pygame.K_RIGHT:
+                    if point_V_x + viseur_speed > dead_zone_right:
+                        point_S_x += viseur_speed
+                    else:
+                        point_V_x += viseur_speed
    
    
 
