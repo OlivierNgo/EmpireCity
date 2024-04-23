@@ -1,12 +1,10 @@
 import pygame
 import os, inspect
-from pygame.transform import scale
 
-#recherche du répertoire de travail
-scriptPATH = os.path.abspath(inspect.getsourcefile(lambda:0)) # compatible interactive Python Shell
-scriptDIR  = os.path.dirname(scriptPATH)
-assets = os.path.join(scriptDIR,"data")
-
+# Recherche du répertoire de travail
+scriptPATH = os.path.abspath(inspect.getsourcefile(lambda:0))  # compatible interactive Python Shell
+scriptDIR = os.path.dirname(scriptPATH)
+assets = os.path.join(scriptDIR, "data")
 
 # Setup
 pygame.init()
@@ -18,53 +16,38 @@ GREEN = (0, 255, 0)
 RED = (255, 0, 0)
 
 police = pygame.font.SysFont("arial", 15)
- 
- 
+
 print(scriptDIR)
- 
- 
-# Set the width and height of the screen [width,height]
-screeenWidth = 400
-screenHeight = 300
-screen = pygame.display.set_mode((screeenWidth,screenHeight))
- 
+
+# Set the width and height of the screen [width, height]
+screeenWidth = 600
+screenHeight = 400
+screen = pygame.display.set_mode((screeenWidth, screenHeight))
+
 pygame.display.set_caption("Empire City")
- 
+
 # Loop until the user clicks the close button.
 done = False
- 
+
 # Used to manage how fast the screen updates
 clock = pygame.time.Clock()
- 
+
 # Hide the mouse cursor
-pygame.mouse.set_visible(True) 
- 
+pygame.mouse.set_visible(True)
+
 # Image de fond
 fond = pygame.image.load(os.path.join(assets, "map.png"))
+map_width = fond.get_width()  # Obtaining the map width
+map_height = fond.get_height()  # Obtaining the map height
 
 # Image du viseur
 viseur = pygame.image.load(os.path.join(assets, "viseur.png"))
- 
- 
+
 # Définition des coordonnées du point S dans le repère du décor
-point_S_x = 353  # Coordonnée x initiale du point S
-point_S_y = 175  # Coordonnée y initiale du point S 
-
-# Définition des valeurs initiales pour que le jeu commence sur le devant de l’église
-point_S_x_initiale = 150  # Coordonnée x du devant de l'église
-point_S_y_initiale = 380  # Coordonnée y du devant de l'église 
-
-# Initialisation des coordonnées du point S pour commencer sur le devant de l’église
-point_S_x = point_S_x_initiale
-point_S_y = point_S_y_initiale
-
-
-# Creation des variables pour stocker les coordonnées du point V
-point_V_x = 0  # Coordonnée x initiale du point V
-point_V_y = 0  # Coordonnée y initiale du point V
+point_S_x = 150  # Coordonnée x initiale du point S (devant de l’église)
+point_S_y = 285  # Coordonnée y initiale du point S (devant de l’église)
 
 # Initialisation de V pour que le viseur se situe au milieu de la fenêtre de jeu
-# Les coordonnées du point V seront au centre de l'écran moins la moitié de la taille du viseur
 point_V_x = (screeenWidth // 2) - (viseur.get_width() // 2)
 point_V_y = (screenHeight // 2) - (viseur.get_height() // 2)
 
@@ -79,65 +62,52 @@ dead_zone_left = (screeenWidth - dead_zone_width) // 2.4
 dead_zone_right = dead_zone_left + dead_zone_width
 dead_zone_top = (screenHeight - dead_zone_height) // 2.6
 dead_zone_bottom = dead_zone_top + dead_zone_height
- 
- 
+
 # -------- Main Program Loop -----------
 while not done:
-   event = pygame.event.Event(pygame.USEREVENT)    # Remise à zero de la variable event
-   
-   # récupère la liste des touches claviers appuyeées sous la forme liste bool
-   pygame.event.pump()
-   
-   for event in pygame.event.get():
-      if event.type == pygame.QUIT:
-         done = True
-      elif event.type == pygame.KEYDOWN:
-           # Gestion des touches du clavier pour déplacer le viseur
-           if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_UP:
-                    if point_V_y - viseur_speed < dead_zone_top:
-                        point_S_y -= viseur_speed
-                    else:
-                        point_V_y -= viseur_speed
-                elif event.key == pygame.K_DOWN:
-                    if point_V_y + viseur_speed > dead_zone_bottom:
-                        point_S_y += viseur_speed
-                    else:
-                        point_V_y += viseur_speed
-                elif event.key == pygame.K_LEFT:
-                    if point_V_x - viseur_speed < dead_zone_left:
-                        point_S_x -= viseur_speed
-                    else:
-                        point_V_x -= viseur_speed
-                elif event.key == pygame.K_RIGHT:
-                    if point_V_x + viseur_speed > dead_zone_right:
-                        point_S_x += viseur_speed
-                    else:
-                        point_V_x += viseur_speed
-   
-   
+    pygame.event.pump()
 
-    # LOGIQUE
- 
- 
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            done = True
+        elif event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_UP:
+                if point_V_y - viseur_speed < dead_zone_top:
+                    new_y = point_S_y - viseur_speed
+                    if new_y >= 0:  # Ensure the map doesn't move out of bounds
+                        point_S_y = new_y
+                else:
+                    point_V_y -= viseur_speed
+            elif event.key == pygame.K_DOWN:
+                new_y = point_S_y + viseur_speed
+                if new_y <= map_height - screenHeight:  # Ensure the map doesn't move out of bounds
+                    point_S_y = new_y
+                else:
+                    point_V_y += viseur_speed
+            elif event.key == pygame.K_LEFT:
+                if point_V_x - viseur_speed < dead_zone_left:
+                    new_x = point_S_x - viseur_speed
+                    if new_x >= 0:  # Ensure the map doesn't move out of bounds
+                        point_S_x = new_x
+                else:
+                    point_V_x -= viseur_speed
+            elif event.key == pygame.K_RIGHT:
+                new_x = point_S_x + viseur_speed
+                if new_x <= map_width - screeenWidth:  # Ensure the map doesn't move out of bounds
+                    point_S_x = new_x
+                else:
+                    point_V_x += viseur_speed
 
- 
-    # DESSIN
-    
-    
-   # affiche la zone de rendu au dessus de fenetre de jeu
-   zonejaune = pygame.Rect( point_S_x, point_S_y, screeenWidth, screenHeight )
-   screen.blit(fond,(0,0),area = zonejaune)
-   
-   # Dessiner le viseur à l'écran
-   screen.blit(viseur, (point_V_x, point_V_y))
-   
-  
-    # Go ahead and update the screen with what we've drawn.
-   pygame.display.flip()
- 
+    # Draw the background and the cursor
+    zonejaune = pygame.Rect(point_S_x, point_S_y, screeenWidth, screenHeight)
+    screen.blit(fond, (0, 0), area=zonejaune)
+    screen.blit(viseur, (point_V_x, point_V_y))
+
+    # Update the screen
+    pygame.display.flip()
+
     # Limit frames per second
-   clock.tick(30)
- 
+    clock.tick(30)
+
 # Close the window and quit.
 pygame.quit()
