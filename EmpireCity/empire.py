@@ -1,5 +1,6 @@
 import pygame
 import os, inspect
+import random
 
 # Recherche du répertoire de travail
 scriptPATH = os.path.abspath(inspect.getsourcefile(lambda:0))  # compatible interactive Python Shell
@@ -40,6 +41,9 @@ fond = pygame.image.load(os.path.join(assets, "map.png"))
 map_width = fond.get_width()  # Obtaining the map width
 map_height = fond.get_height()  # Obtaining the map height
 
+# Image du bandit
+bandit = pygame.image.load(os.path.join(assets, "bandit_rue.png"))
+
 # Image du viseur
 viseur = pygame.image.load(os.path.join(assets, "viseur.png"))
 
@@ -63,6 +67,13 @@ dead_zone_right = dead_zone_left + dead_zone_width
 dead_zone_top = (screenHeight - dead_zone_height) // 2.6
 dead_zone_bottom = dead_zone_top + dead_zone_height
 
+# Sauvegarde de la valeur de l'horloge au démarrage
+T0 = int(pygame.time.get_ticks()/1000)
+
+# Initialisation de la position du bandit
+bandit_x = None
+bandit_y = None
+
 # -------- Main Program Loop -----------
 while not done:
     pygame.event.pump()
@@ -79,9 +90,10 @@ while not done:
                 else:
                     point_V_y -= viseur_speed
             elif event.key == pygame.K_DOWN:
-                new_y = point_S_y + viseur_speed
-                if new_y <= map_height - screenHeight:  # Ensure the map doesn't move out of bounds
-                    point_S_y = new_y
+                if point_V_y - viseur_speed > dead_zone_bottom:
+                    new_y = point_S_y + viseur_speed
+                    if new_y <= map_height - screenHeight:  # Ensure the map doesn't move out of bounds
+                        point_S_y = new_y
                 else:
                     point_V_y += viseur_speed
             elif event.key == pygame.K_LEFT:
@@ -92,9 +104,10 @@ while not done:
                 else:
                     point_V_x -= viseur_speed
             elif event.key == pygame.K_RIGHT:
-                new_x = point_S_x + viseur_speed
-                if new_x <= map_width - screeenWidth:  # Ensure the map doesn't move out of bounds
-                    point_S_x = new_x
+                if point_V_x - viseur_speed > dead_zone_right:
+                    new_x = point_S_x + viseur_speed
+                    if new_x <= map_width - screeenWidth:  # Ensure the map doesn't move out of bounds
+                        point_S_x = new_x
                 else:
                     point_V_x += viseur_speed
 
@@ -103,11 +116,23 @@ while not done:
     screen.blit(fond, (0, 0), area=zonejaune)
     screen.blit(viseur, (point_V_x, point_V_y))
 
+    # Apparition du bandit apres 3 secondes apres le demarrage du jeu
+    current_time = int(pygame.time.get_ticks()/1000)
+    if current_time - T0 >= 3 and bandit_x is None:
+        bandit_x = random.random() * screeenWidth
+        bandit_y = 200
+        screen.blit(bandit, (bandit_x, bandit_y))
+
+    # Affichage du bandit lorsqu'il a ete initialiser
+    if bandit_x is not None and bandit_y is not None:
+        screen.blit(bandit, (bandit_x, bandit_y))
+    
+
     # Update the screen
     pygame.display.flip()
 
     # Limit frames per second
-    clock.tick(30)
+    clock.tick(60)
 
 # Close the window and quit.
 pygame.quit()
