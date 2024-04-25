@@ -20,17 +20,21 @@ police = pygame.font.SysFont("arial", 15)
 
 print(scriptDIR)
 
-# Set the width and height of the screen [width, height]
+# Taille de la fenetre
 screeenWidth = 600
 screenHeight = 400
 screen = pygame.display.set_mode((screeenWidth, screenHeight))
 
 pygame.display.set_caption("Empire City")
 
-# Loop until the user clicks the close button.
+# Vairables de direction
+move_up = False
+move_down = False
+move_left = False
+move_right = False
+
 done = False
 
-# Used to manage how fast the screen updates
 clock = pygame.time.Clock()
 
 # Hide the mouse cursor
@@ -62,17 +66,19 @@ dead_zone_width = screeenWidth // 3
 dead_zone_height = screenHeight // 3
 
 # Définir les limites de la zone morte
-dead_zone_left = (screeenWidth - dead_zone_width) // 2.4
+dead_zone_left = (screeenWidth - dead_zone_width) // 9
 dead_zone_right = dead_zone_left + dead_zone_width
 dead_zone_top = (screenHeight - dead_zone_height) // 2.6
 dead_zone_bottom = dead_zone_top + dead_zone_height
 
-# Sauvegarde de la valeur de l'horloge au démarrage
-T0 = int(pygame.time.get_ticks()/1000)
+# Sauvegarde de la valeur de l'horloge au démarrage et pour le respawn du bandit
+T0 = pygame.time.get_ticks()
+bandit_timer = None
 
 # Initialisation de la position du bandit
 bandit_x = None
 bandit_y = None
+bandit_visible = False
 
 # -------- Main Program Loop -----------
 while not done:
@@ -83,50 +89,66 @@ while not done:
             done = True
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_UP:
-                if point_V_y - viseur_speed < dead_zone_top:
-                    new_y = point_S_y - viseur_speed
-                    if new_y >= 0:  # Ensure the map doesn't move out of bounds
-                        point_S_y = new_y
-                else:
-                    point_V_y -= viseur_speed
+                move_up = True
             elif event.key == pygame.K_DOWN:
-                if point_V_y - viseur_speed > dead_zone_bottom:
-                    new_y = point_S_y + viseur_speed
-                    if new_y <= map_height - screenHeight:  # Ensure the map doesn't move out of bounds
-                        point_S_y = new_y
-                else:
-                    point_V_y += viseur_speed
+                move_down = True
             elif event.key == pygame.K_LEFT:
-                if point_V_x - viseur_speed < dead_zone_left:
-                    new_x = point_S_x - viseur_speed
-                    if new_x >= 0:  # Ensure the map doesn't move out of bounds
-                        point_S_x = new_x
-                else:
-                    point_V_x -= viseur_speed
+                move_left = True
             elif event.key == pygame.K_RIGHT:
-                if point_V_x - viseur_speed > dead_zone_right:
-                    new_x = point_S_x + viseur_speed
-                    if new_x <= map_width - screeenWidth:  # Ensure the map doesn't move out of bounds
-                        point_S_x = new_x
-                else:
-                    point_V_x += viseur_speed
+                move_right = True
+        elif event.type == pygame.KEYUP:
+            if event.key == pygame.K_UP:
+                move_up = False
+            elif event.key == pygame.K_DOWN:
+                move_down = False
+            elif event.key == pygame.K_LEFT:
+                move_left = False
+            elif event.key == pygame.K_RIGHT:
+                move_right = False
 
-    # Draw the background and the cursor
+    # Deplacement dans la boucle principale
+    if move_up:
+        if point_V_y - viseur_speed < dead_zone_top:
+            new_y = point_S_y - viseur_speed
+            if new_y >= 0:
+                point_S_y = new_y
+        else:
+            point_V_y -= viseur_speed
+    if move_down:
+        if point_V_y + viseur_speed > dead_zone_bottom:
+            new_y = point_S_y + viseur_speed
+            if new_y <= map_height - screenHeight:
+                point_S_y = new_y
+        else:
+            point_V_y += viseur_speed
+    if move_left:
+        if point_V_x - viseur_speed < dead_zone_left:
+            new_x = point_S_x - viseur_speed
+            if new_x >= 0:
+                point_S_x = new_x
+        else:
+            point_V_x -= viseur_speed
+    if move_right:
+        if point_V_x + viseur_speed > dead_zone_right:
+            new_x = point_S_x + viseur_speed
+            if new_x <= map_width - screeenWidth:
+                point_S_x = new_x
+        else:
+            point_V_x += viseur_speed
+
     zonejaune = pygame.Rect(point_S_x, point_S_y, screeenWidth, screenHeight)
     screen.blit(fond, (0, 0), area=zonejaune)
     screen.blit(viseur, (point_V_x, point_V_y))
 
-    # Apparition du bandit apres 3 secondes apres le demarrage du jeu
-    current_time = int(pygame.time.get_ticks()/1000)
-    if current_time - T0 >= 3 and bandit_x is None:
-        bandit_x = random.random() * screeenWidth
-        bandit_y = 200
-        screen.blit(bandit, (bandit_x, bandit_y))
+    # Apparition du bandit après 3 secondes après le démarrage du jeu
+    if pygame.time.get_ticks() - T0 >= 3000 and bandit_x is None and bandit_y is None:
+        bandit_x = random.random() * (screeenWidth - bandit.get_width())
+        bandit_y = 500 #Niveau du trottoir
+        bandit_visible = True
 
-    # Affichage du bandit lorsqu'il a ete initialiser
-    if bandit_x is not None and bandit_y is not None:
-        screen.blit(bandit, (bandit_x, bandit_y))
-    
+    # Affichage du bandit lorsqu'il a été initialisé et est visible
+    if bandit_visible:
+        screen.blit(bandit, (bandit_x - point_S_x, bandit_y - point_S_y))
 
     # Update the screen
     pygame.display.flip()
