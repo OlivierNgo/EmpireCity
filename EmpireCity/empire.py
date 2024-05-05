@@ -136,26 +136,36 @@ while not done:
         else:
             point_V_y -= viseur_speed
     if move_down:
-        if point_V_y + viseur_speed > dead_zone_bottom:
+        if point_V_y + viseur_speed > dead_zone_bottom and point_S_y < map_height - screenHeight:
             new_y = point_S_y + viseur_speed
             if new_y <= map_height - screenHeight:
                 point_S_y = new_y
         else:
             point_V_y += viseur_speed
     if move_left:
-        if point_V_x - viseur_speed < dead_zone_left:
+        if point_V_x - viseur_speed < dead_zone_left and point_S_x > 0:
             new_x = point_S_x - viseur_speed
             if new_x >= 0:
                 point_S_x = new_x
         else:
             point_V_x -= viseur_speed
     if move_right:
-        if point_V_x + viseur_speed > dead_zone_right:
+        if point_V_x + viseur_speed > dead_zone_right and point_S_x < map_width - screeenWidth:
             new_x = point_S_x + viseur_speed
             if new_x <= map_width - screeenWidth:
                 point_S_x = new_x
         else:
             point_V_x += viseur_speed
+
+    if point_V_x < 0:
+        point_V_x = 0
+    elif point_V_x > screeenWidth - viseur.get_width():
+        point_V_x = screeenWidth - viseur.get_width()
+
+    if point_V_y < 0:
+        point_V_y = 0
+    elif point_V_y > screenHeight - viseur.get_height():
+        point_V_y = screenHeight - viseur.get_height()
 
     zonejaune = pygame.Rect(point_S_x, point_S_y, screeenWidth, screenHeight)
     screen.blit(fond, (0, 0), area=zonejaune)
