@@ -93,6 +93,8 @@ window_positions = [
     (1200, 450), # Fenêtre 3
 ]
 
+score = 0
+
 while not done:
     pygame.event.pump()
 
@@ -115,6 +117,7 @@ while not done:
                     if bandit_rect.colliderect(viseur_rect):
                         bandit_visible = False
                         bandit_timer = pygame.time.get_ticks()
+                        score += 10
                 screen.blit(bang, (point_V_x, point_V_y))
                 point_V_y -= 20
         elif event.type == pygame.KEYUP:
@@ -219,6 +222,12 @@ while not done:
             current_bandit_image = bandit
         bandit_visible = True
         bandit_timer = None  # Réinitialiser le timer
+
+    # Affichage du score
+    score_text = police.render('Score: ' + str(score), True, WHITE)
+    score_rect = score_text.get_rect()
+    score_rect.bottomright = (screeenWidth - 10, screenHeight - 10)
+    screen.blit(score_text, score_rect)
 
     # Mise à jour de l'écran
     pygame.display.flip()
