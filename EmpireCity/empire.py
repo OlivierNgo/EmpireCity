@@ -55,6 +55,10 @@ viseur = pygame.image.load(os.path.join(assets, "viseur.png"))
 # Animation du tir
 bang = pygame.image.load(os.path.join(assets, "bang.png"))
 
+# Image d'une balle
+bullet = pygame.image.load(os.path.join(assets, "bullet.png"))
+bullet_count = 6
+
 # Coordonnées initiales
 point_S_x = 150
 point_S_y = 285
@@ -111,15 +115,19 @@ while not done:
             elif event.key == pygame.K_RIGHT:
                 move_right = True
             elif event.key == pygame.K_SPACE:
-                if bandit_visible:
-                    bandit_rect = pygame.Rect(bandit_x - point_S_x, bandit_y - point_S_y, bandit.get_width(), bandit.get_height())
-                    viseur_rect = pygame.Rect(point_V_x, point_V_y, viseur.get_width(), viseur.get_height())
-                    if bandit_rect.colliderect(viseur_rect):
-                        bandit_visible = False
-                        bandit_timer = pygame.time.get_ticks()
-                        score += 10
-                screen.blit(bang, (point_V_x, point_V_y))
-                point_V_y -= 20
+                if bullet_count > 0:
+                    if bandit_visible:
+                        bandit_rect = pygame.Rect(bandit_x - point_S_x, bandit_y - point_S_y, bandit.get_width(), bandit.get_height())
+                        viseur_rect = pygame.Rect(point_V_x, point_V_y, viseur.get_width(), viseur.get_height())
+                        if bandit_rect.colliderect(viseur_rect):
+                            bandit_visible = False
+                            bandit_timer = pygame.time.get_ticks()
+                            score += 10
+                    screen.blit(bang, (point_V_x, point_V_y))
+                    point_V_y -= 20
+                    bullet_count -= 1
+            elif event.key == pygame.K_r:
+                bullet_count = 6
         elif event.type == pygame.KEYUP:
             if event.key == pygame.K_UP:
                 move_up = False
@@ -206,7 +214,7 @@ while not done:
 
     # Dessiner l'image "bang.png" si la touche ESPACE est pressée
     keys = pygame.key.get_pressed()
-    if keys[pygame.K_SPACE]:
+    if keys[pygame.K_SPACE] and bullet_count > 0:
         screen.blit(bang, (point_V_x + 10, point_V_y + 10))
 
     pygame.display.flip()
@@ -224,10 +232,17 @@ while not done:
         bandit_timer = None  # Réinitialiser le timer
 
     # Affichage du score
-    score_text = police.render('Score: ' + str(score), True, WHITE)
+    score_text = police.render('Score: ' + str(score), True, BLACK)
     score_rect = score_text.get_rect()
     score_rect.bottomright = (screeenWidth - 10, screenHeight - 10)
     screen.blit(score_text, score_rect)
+
+    # Affichage des balles
+    screen.blit(bullet, (screeenWidth - bullet.get_width() - 10, 10))
+    bullet_text = police.render(str(bullet_count) + ' x', True, BLACK)
+    bullet_rect = bullet_text.get_rect()
+    bullet_rect.topright = (screeenWidth - bullet.get_width() - 20, 20)
+    screen.blit(bullet_text, bullet_rect)
 
     # Mise à jour de l'écran
     pygame.display.flip()
