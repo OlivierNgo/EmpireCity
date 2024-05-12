@@ -2,12 +2,12 @@ import pygame
 import os, inspect
 import random
 
-def display_win_message(screen):
+def Victoire(screen):
     win_text = pygame.font.SysFont("comicsansms", 48, bold=True).render("VICTOIRE !", True, WHITE)
     win_rect = win_text.get_rect(center=(screeenWidth // 2, screenHeight // 2))
     #Fond transparent
     overlay = pygame.Surface((screeenWidth, screenHeight), flags=pygame.SRCALPHA)
-    overlay.fill((0, 0, 0, 128))  # Noir semi-transparent
+    overlay.fill((0, 0, 0, 128))
     screen.blit(overlay, (0, 0))
     for alpha in range(0, 255, 15):
         win_text.set_alpha(alpha)
@@ -16,7 +16,7 @@ def display_win_message(screen):
         pygame.time.wait(100)
     pygame.time.wait(5000)
 
-def draw_text_with_shadow(screen, text, font, color, x, y):
+def Fond(screen, text, font, color, x, y):
     shadow_color = (0, 0, 0)  # Noir pour l'ombre
     # Dessiner l'ombre légèrement décalée
     shadow_text = font.render(text, True, shadow_color)
@@ -258,7 +258,8 @@ while not done:
 
     # Affichage du score
     score_text = f'Score: {score}'
-    draw_text_with_shadow(screen, score_text, score_font, WHITE, screeenWidth - 160, screenHeight - 50)
+
+    Fond(screen, score_text, score_font, WHITE, screeenWidth - 160, screenHeight - 50)
 
     # Affichage des balles
     screen.blit(bullet, (screeenWidth - bullet.get_width() - 10, 10))
@@ -268,7 +269,7 @@ while not done:
     screen.blit(bullet_text, bullet_rect)
 
     if score >= 100:  # Vérifier si le score atteint 100
-        display_win_message(screen)
+        Victoire(screen)
         done = True
 
     # Mise à jour de l'écran
