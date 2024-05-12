@@ -2,6 +2,29 @@ import pygame
 import os, inspect
 import random
 
+def display_win_message(screen):
+    win_text = pygame.font.SysFont("comicsansms", 48, bold=True).render("VICTOIRE !", True, WHITE)
+    win_rect = win_text.get_rect(center=(screeenWidth // 2, screenHeight // 2))
+    #Fond transparent
+    overlay = pygame.Surface((screeenWidth, screenHeight), flags=pygame.SRCALPHA)
+    overlay.fill((0, 0, 0, 128))  # Noir semi-transparent
+    screen.blit(overlay, (0, 0))
+    for alpha in range(0, 255, 15):
+        win_text.set_alpha(alpha)
+        screen.blit(win_text, win_rect)
+        pygame.display.flip()
+        pygame.time.wait(100)
+    pygame.time.wait(5000)
+
+def draw_text_with_shadow(screen, text, font, color, x, y):
+    shadow_color = (0, 0, 0)  # Noir pour l'ombre
+    # Dessiner l'ombre légèrement décalée
+    shadow_text = font.render(text, True, shadow_color)
+    screen.blit(shadow_text, (x + 2, y + 2))
+    # Dessiner le texte principal
+    main_text = font.render(text, True, color)
+    screen.blit(main_text, (x, y))
+
 # Recherche du répertoire de travail
 scriptPATH = os.path.abspath(inspect.getsourcefile(lambda:0))
 scriptDIR = os.path.dirname(scriptPATH)
@@ -17,6 +40,8 @@ GREEN = (0, 255, 0)
 RED = (255, 0, 0)
 
 police = pygame.font.SysFont("arial", 15)
+# Charger une police dynamique et colorée
+score_font = pygame.font.SysFont("comicsansms", 28, bold=True)
 
 print(scriptDIR)
 
@@ -232,10 +257,8 @@ while not done:
         bandit_timer = None  # Réinitialiser le timer
 
     # Affichage du score
-    score_text = police.render('Score: ' + str(score), True, BLACK)
-    score_rect = score_text.get_rect()
-    score_rect.bottomright = (screeenWidth - 10, screenHeight - 10)
-    screen.blit(score_text, score_rect)
+    score_text = f'Score: {score}'
+    draw_text_with_shadow(screen, score_text, score_font, WHITE, screeenWidth - 160, screenHeight - 50)
 
     # Affichage des balles
     screen.blit(bullet, (screeenWidth - bullet.get_width() - 10, 10))
@@ -243,6 +266,10 @@ while not done:
     bullet_rect = bullet_text.get_rect()
     bullet_rect.topright = (screeenWidth - bullet.get_width() - 20, 20)
     screen.blit(bullet_text, bullet_rect)
+
+    if score >= 100:  # Vérifier si le score atteint 100
+        display_win_message(screen)
+        done = True
 
     # Mise à jour de l'écran
     pygame.display.flip()
